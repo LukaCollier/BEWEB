@@ -63,31 +63,25 @@ def get_flashcards_by_bank(bank_id):
 def index():
     return render_template("index.html")
 
-
 @app.route("/about")
 def about():
     return render_template("about.html")
-
 
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
 
-
 @app.route("/team/camille")
 def team_camille():
     return render_template("team/camille.html")
-
 
 @app.route("/team/etienne")
 def team_etienne():
     return render_template("team/etienne.html")
 
-
 @app.route("/team/luka")
 def team_luka():
     return render_template("team/luka.html")
-
 
 @app.route("/team/darya")
 def team_darya():
@@ -100,38 +94,44 @@ def team_darya():
 def signin():
     return render_template("signin.html")
 
-
 @app.route("/connecter", methods=["GET", "POST"])
 def connect():
     if request.method == "POST":
         login = request.form['login']
         mdp = request.form['mdp']
-        user = bdd.verifAuthData(login, mdp)
-        print("USER:", user)
-        try:
-            session["idUser"] = user["idutilisateur"]
-            session["nom"] = user["nom"]
-            session["prenom"] = user["prenom"]
-            session["mail"] = user["mail"]
-            session["login"] = user["login"]
-            session["statut"] = user["statut"]
-            session["avatar"] = user["avatar"]
-            flash("Authentification réussie", "success")
-            if session["statut"] == "administrateur":
-                return redirect("/admin")
-            return redirect("/")
-        except TypeError:
-            flash("Authentification refusée", "danger")
-            return redirect("/signin")
-    return render_template("signin.html")
 
+        # Vérifie si le login existe
+        user_login = bdd.verifLogin(login)
+        if not user_login:
+            flash("Ce login n'existe pas", "danger")
+            return redirect("/signin")
+
+        # Vérifie le mot de passe
+        user = bdd.verifAuthData(login, mdp)
+        if not user:
+            flash("Mot de passe incorrect", "danger")
+            return redirect("/signin")
+
+        # Authentification réussie
+        session["idUser"] = user["idutilisateur"]
+        session["nom"] = user["nom"]
+        session["prenom"] = user["prenom"]
+        session["mail"] = user["mail"]
+        session["login"] = user["login"]
+        session["statut"] = user["statut"]
+        session["avatar"] = user["avatar"]
+        flash("Authentification réussie", "success")
+        if session["statut"] == "administrateur":
+            return redirect("/admin")
+        return redirect("/gestion")
+
+    return render_template("signin.html")
 
 @app.route("/logout")
 def logout():
     session.clear()
     flash("Vous avez été déconnecté", "success")
     return redirect("/signin")
-
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -178,7 +178,6 @@ def banques():
         error = "Impossible de charger les banques de flashcards pour le moment."
     return render_template("banques.html", banks=banks, error=error)
 
-
 @app.route("/banques/<int:bank_id>")
 @f.statuts_obligatoires()
 def banque_detail(bank_id):
@@ -199,7 +198,6 @@ def banque_detail(bank_id):
         selected_bank=selected_bank,
         error=error,
     )
-
 
 @app.route("/admin")
 @f.statuts_obligatoires('administrateur')

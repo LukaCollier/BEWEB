@@ -2,13 +2,10 @@
 <html lang="en">
   {%include("layout/header.html") %}
   <body>
-    <!-- Fixed navbar -->
     {%include("layout/nav.html") %}
-    <!-- /.navbar -->
 
     <header id="head" class="secondary"></header>
 
-    <!-- container -->
     <div class="container">
       <ol class="breadcrumb">
         <li><a href="/">Accueil</a></li>
@@ -31,6 +28,16 @@
                 </p>
                 <hr />
 
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ category }} top-margin">
+                        {{ message }}
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+
                 <form method="POST" action="/connecter">
                   <div class="top-margin">
                     <label>Login <span class="text-danger">*</span></label>
@@ -40,12 +47,6 @@
                     <label>Mot de passe <span class="text-danger">*</span></label>
                     <input type="password" name="mdp" class="form-control" placeholder="••••••••" />
                   </div>
-
-                  {% if error %}
-                  <div class="top-margin">
-                    <p style="color:red;">{{ error }}</p>
-                  </div>
-                  {% endif %}
 
                   <hr />
 
@@ -67,7 +68,6 @@
         </article>
       </div>
     </div>
-    <!-- /container -->
 
     {% include("layout/footer.html") %}
 
