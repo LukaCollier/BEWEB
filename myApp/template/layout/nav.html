@@ -12,40 +12,61 @@
         <span class="icon-bar"></span> <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/"
-        ><img src="static/images/logo.png" alt="Flashcards ENAC"
-      /></a>
+      <a class="navbar-brand" href="/">
+        <img src="static/images/logo.png" alt="Flashcards ENAC" />
+      </a>
     </div>
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav pull-right">
+
+        <!-- Liens publics -->
         <li class="{{ 'active' if request.path == '/' }}">
           <a href="/">Accueil</a>
         </li>
-        <li class="{{ 'active' if request.path == '/banques' }}">
-          <a href="/banques">Banques</a>
-        </li>
-        <li
-          class="{{ 'active' if request.path == '/about' or request.path.startswith('/team') }}"
-        >
+        <li class="{{ 'active' if request.path == '/about' or request.path.startswith('/team') }}">
           <a href="/about">À propos de nous</a>
         </li>
         <li class="{{ 'active' if request.path == '/contact' }}">
           <a href="/contact">Contact</a>
         </li>
-        {% if session['statut']%}
-        <li><a class="btn" href="/admin">Administration</a></li>
-        {% endif%} {%if session['idUser']%}
-        <img
-          class="rounded-circle mr-3"
-          src="/static/img/avatar/{{ session['avatar']}}"
-          alt="user"
-        />
-        <h5 class="pt-2">{{ session['prenom']}} {{session['nom']}}</h5>
 
-        <li><a class="btn" href="/logout">Se déconnecter</a></li>
-        {%else%}
-        <li><a class="btn" href="/signin">CONNEXION / INSCRIPTION</a></li>
-        {%endif%}
+        <!-- Liens privés (connecté) -->
+        {% if session.get('idUser') %}
+        <li class="{{ 'active' if request.path == '/banques' }}">
+          <a href="/banques">Banques</a>
+        </li>
+        {% endif %}
+
+        <!-- Lien gestion (gestionnaire et administrateur) -->
+        {% if session.get('statut') == 'gestionnaire' or session.get('statut') == 'administrateur' %}
+        <li class="{{ 'active' if request.path == '/gestion' }}">
+          <a href="/gestion">Gestion</a>
+        </li>
+        {% endif %}
+
+        <!-- Lien administration (administrateur uniquement) -->
+        {% if session.get('statut') == 'administrateur' %}
+        <li class="{{ 'active' if request.path == '/admin' }}">
+          <a href="/admin">Administration</a>
+        </li>
+        {% endif %}
+
+        <!-- Nom et déconnexion si connecté -->
+        {% if session.get('idUser') %}
+        <li class="navbar-text" style="color:white;">
+          {{ session.get('prenom') }} {{ session.get('nom') }}
+        </li>
+        <li>
+          <a class="btn" href="/logout">Se déconnecter</a>
+        </li>
+
+        <!-- Bouton connexion si non connecté -->
+        {% else %}
+        <li>
+          <a class="btn" href="/signin">CONNEXION / INSCRIPTION</a>
+        </li>
+        {% endif %}
+
       </ul>
     </div>
     <!--/.nav-collapse -->
