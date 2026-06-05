@@ -168,6 +168,7 @@ def get_carte_by_id(idcarte):
     return bddGen.selectOneData(func_name(), sql, param, None)
 
 def get_paquets_revision(idutilisateur):
+<<<<<<< HEAD
     sql = """ SELECT p.idpaquet, p.nompaquet, 
               COALESCE(c.nomcategorie, 'Sans catégorie') as nomcategorie
               FROM paquet p LEFT JOIN categorie c
@@ -191,3 +192,12 @@ def update_revision(idutilisateur, idcarte, idboite):
     sql = "UPDATE revision SET idboite=%s, date_derniere_revision=NOW() WHERE idutilisateur=%s AND idcarte=%s;"
     param = (idboite, idutilisateur, idcarte)
     return bddGen.updateData(func_name(), sql, param, None)
+=======
+    sql = """ SELECT p.idpaquet, p.nompaquet, c.nomcategorie
+        FROM paquet p INNER JOIN categorie c
+        ON p.idcategorie = c.idcategorie
+        WHERE p.idcreateur=%s
+        ORDER BY c.nomcategorie, p.nompaquet"""
+    param = (idutilisateur,)
+    return bddGen.selectData(func_name(), sql, param)  
+>>>>>>> e76e36a0d5dbd65ee553f9ae633c4316080e25ad
