@@ -459,8 +459,6 @@ def afficher_reponse():
     session["show_answer"] = True
     return redirect(url_for("revision_carte"))
 
-
-<<<<<<< HEAD
 @app.route("/revision/suivante/<int:idcarte>/<int:savais>", methods=["POST"])
 @f.statuts_obligatoires()
 def carte_suivante(idcarte, savais):
@@ -481,12 +479,3 @@ def carte_suivante(idcarte, savais):
     session["revision_index"] += 1
     session["show_answer"] = False
     return redirect(url_for("revision_carte"))
-=======
-#carte suivante
-@app.route("/revision/suivante", methods=["POST"])
-@f.statuts_obligatoires()
-def carte_suivante():
-    session["revision_index"] += 1
-    session["show_answer"] = False
-    return redirect(url_for("revision_carte"))
->>>>>>> e76e36a0d5dbd65ee553f9ae633c4316080e25ad

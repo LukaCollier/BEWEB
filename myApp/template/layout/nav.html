@@ -2,10 +2,6 @@
 <div class="navbar navbar-inverse navbar-fixed-top headroom">
   <div class="container">
     <div class="navbar-header">
-<<<<<<< HEAD
-=======
-      <!-- Button for smallest screens -->
->>>>>>> e76e36a0d5dbd65ee553f9ae633c4316080e25ad
       <button
         type="button"
         class="navbar-toggle"
@@ -30,7 +26,6 @@
           <a href="/about">À propos de nous</a>
         </li>
 
-<<<<<<< HEAD
         <!-- Dropdown Gestion paquet (connecté uniquement) -->
         {% if session.get('idUser') %}
         <li class="dropdown">
@@ -46,28 +41,6 @@
         </li>
         {% endif %}
 
-=======
-
-        <!-- Liens privés (connecté) -->
-        {% if session.get('idUser') %}
-        <li class="dropdown">
-          <a href="#" class="dropbtn">Gestion paquet ▾</a>
-
-          <ul class="dropdown-content">
-            <li class="{{ 'active' if request.path == '/banques' }}">
-              <a href="/banques">Banques</a>
-            </li>
-
-            <li class="{{ 'active' if request.path == '/paquet' }}">
-              <a href="/paquet">Paquet</a>
-            </li>
-            <li class="{{ 'active' if request.path == '/listepaquet' }}">
-              <a href="/listepaquet">liste paquet</a>
-            </li>
-          </ul>
-        </li>
-        {% endif %}
->>>>>>> e76e36a0d5dbd65ee553f9ae633c4316080e25ad
         <!-- Lien gestion (gestionnaire et administrateur) -->
         {% if session.get('statut') == 'gestionnaire' or session.get('statut') == 'administrateur' %}
         <li class="{{ 'active' if request.path == '/gestion' }}">
@@ -91,10 +64,6 @@
           <a class="btn" href="/logout">Se déconnecter</a>
         </li>
 
-<<<<<<< HEAD
-=======
-        <!-- Bouton connexion si non connecté -->
->>>>>>> e76e36a0d5dbd65ee553f9ae633c4316080e25ad
         {% else %}
         <li>
           <a class="btn" href="/signin">CONNEXION / INSCRIPTION</a>
@@ -103,12 +72,5 @@
 
       </ul>
     </div>
-<<<<<<< HEAD
   </div>
 </div>
-=======
-    <!--/.nav-collapse -->
-  </div>
-</div>
-<!-- /.navbar -->
->>>>>>> e76e36a0d5dbd65ee553f9ae633c4316080e25ad
