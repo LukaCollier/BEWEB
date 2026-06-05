@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% include "layout/header.html" %}
+  <body>
+    {% include "layout/nav.html" %}
+
+    <header id="head" class="secondary"></header>
+
+    <div class="container">
+      <ol class="breadcrumb">
+        <li><a href="/">Accueil</a></li>
+        <li class="active">Publique</li>
+      </ol>
+
+      <div class="row">
+        <article class="col-sm-12 maincontent">
+          <header class="page-header">
+            <h1 class="page-title">Publique</h1>
+          </header>
+          <p>Bienvenue {{ session.get('prenom') }} {{ session.get('nom') }} !</p>
+
+          <div class="dropdown" style="margin: 20px 0 30px 0; display: inline-block;">
+            <a href="#" class="btn btn-primary dropbtn">Choisir une catégorie ▾</a>
+            <ul class="dropdown-content">
+              <li><a href="{{ url_for('listepaquet') }}">Toutes les catégories</a></li>
+              {% for categorie in categories %}
+              <li><a href="{{ url_for('banque_detail', bank_id=categorie.id) }}">{{ categorie.name }} <span class="badge">{{ categorie.card_count }}</span></a></li>
+              {% endfor %}
+            </ul>
+          </div>
+
+        </article>
+      </div>
+    </div>
+
+    
+      {#liste des membres #}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>consulter</th>
+            <th>nom paquet</th>
+            <th>catégorie</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if liste and liste is not none %}
+            {% for paquet in liste %}
+            <tr>
+              <td><a href="{{ url_for('cartes', idpaquet=paquet.idpaquet) }}" class="btn btn-danger">consulter</a></td>
+              <td>{{ paquet.nompaquet }}</td>
+              <td>{{ paquet.nomcategorie or 'Sans catégorie' }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="3">Aucun paquet à afficher.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+    {% include "layout/footermain.html" %}
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src="static/js/headroom.min.js"></script>
+    <script src="static/js/jQuery.headroom.min.js"></script>
+    <script src="static/js/template.js"></script>
+  </body>
+</html>
