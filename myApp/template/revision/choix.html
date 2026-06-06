@@ -35,6 +35,14 @@
         Sélectionnez un paquet pour démarrer
     </p>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
     {% if categories %}
 
         {% for categorie, paquets in categories.items() %}

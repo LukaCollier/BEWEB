@@ -191,3 +191,20 @@ def update_revision(idutilisateur, idcarte, idboite):
     sql = "UPDATE revision SET idboite=%s, date_derniere_revision=NOW() WHERE idutilisateur=%s AND idcarte=%s;"
     param = (idboite, idutilisateur, idcarte)
     return bddGen.updateData(func_name(), sql, param, None)
+
+def get_cartes_a_reviser(idutilisateur, idpaquet):
+    sql = """
+        SELECT c.idcarte, c.question, c.reponse,
+               COALESCE(r.idboite, 1) as idboite
+        FROM carte c
+        LEFT JOIN revision r ON r.idcarte = c.idcarte 
+            AND r.idutilisateur = %s
+        LEFT JOIN boite b ON b.idboite = r.idboite
+        WHERE c.idpaquet = %s
+        AND (
+            r.idcarte IS NULL
+            OR DATE_ADD(r.date_derniere_revision, INTERVAL COALESCE(b.duree, 1) DAY) <= NOW()
+        );
+    """
+    param = (idutilisateur, idpaquet)
+    return bddGen.selectData(func_name(), sql, param, None)

@@ -109,8 +109,6 @@ def connect():
         if not user:
             flash("Identifiants incorrects", "danger")
             return redirect("/signin")
-
-        # Authentification réussie
         session["idUser"] = user["idutilisateur"]
         session["idutilisateur"] = user["idutilisateur"]
         session["nom"] = user["nom"]
@@ -124,7 +122,6 @@ def connect():
         if session["statut"] == "gestionnaire":
             return redirect("/gestion")
         return redirect("/banques")
-
     return render_template("signin.html")
 
 @app.route("/logout")
@@ -137,27 +134,21 @@ def logout():
 def signup():
     if request.method == "POST":
         rform = request.form
-
         if bdd.check_email(rform["email"]):
             flash("Cette adresse mail est déjà utilisée", "danger")
             return redirect(url_for('signup'))
-
         if bdd.check_pseudo(rform["pseudo"]):
             flash("Ce pseudonyme est déjà utilisé", "danger")
             return redirect(url_for('signup'))
-
         caracteres = string.ascii_letters + string.digits
         mdp = ''.join(secrets.choice(caracteres) for _ in range(5))
         mdp_hash = hashlib.sha256(mdp.encode()).hexdigest()
-
         msg = {
             "ok": "Vos informations ont bien été ajoutées à la base de données, veuillez à présent choisir un nouveau mot de passe.",
             "echec": "Echec d'ajout des informations dans la base de données"
         }
-
         idutilisateur = bdd.add_userData(rform, mdp_hash, msg)
         if idutilisateur:
-            # Récupérer les données utilisateur pour la session
             user = bdd.get_userById(idutilisateur)
             if user:
                 session["idUser"] = idutilisateur
@@ -169,10 +160,8 @@ def signup():
                 session["statut"] = user["statut"]
             flash(f"Votre mot de passe actuel est : {mdp}.", "info")
             return redirect(url_for('modifMdp'))
-
         flash("Une erreur s'est produite lors de l'inscription, veuillez réessayer", "danger")
         return redirect(url_for('signup'))
-
     return render_template("signup.html")
 
 
@@ -182,29 +171,23 @@ def modifMdp():
     if not idutilisateur:
         flash("Veuillez vous connecter pour modifier votre mot de passe", "danger")
         return redirect(url_for('signin'))
-
     if request.method == 'POST':
         ancien_mdp = request.form.get('ancienmdp')
         nv_mdp = request.form.get('nvmdp')
         confirm_mdp = request.form.get('confirmmdp')
-
         if hashlib.sha256(ancien_mdp.encode()).hexdigest() != bdd.getMdp(idutilisateur):
             flash("Le mot de passe saisi dans Ancien mot de passe ne correspond pas", "danger")
             return redirect(url_for('modifMdp'))
-
         if nv_mdp != confirm_mdp:
             flash("Les mots de passe saisis dans Nouveau mot de passe et Confirmer votre nouveau mot de passe ne correspondent pas", "danger")
             return redirect(url_for('modifMdp'))
-
         if len(nv_mdp) < 8:
             flash("Votre nouveau mot de passe doit contenir au moins 8 caractères", "danger")
             return redirect(url_for('modifMdp'))
-
         nv_mdp_hash = hashlib.sha256(nv_mdp.encode()).hexdigest()
         bdd.update_userMdpData(nv_mdp_hash, idutilisateur)
         flash("Votre mot de passe a bien été modifié.", "success")
         return redirect(url_for('signin'))
-
     return render_template("modifMdp.html")
 
 
@@ -252,16 +235,16 @@ def admin():
 @app.route("/gestion")
 @f.statuts_obligatoires('gestionnaire', 'administrateur')
 def gestion():
-    iduser= session.get("idutilisateur")
+    iduser = session.get("idutilisateur")
     nbcartes = bdd.get_nombrecartes_user(iduser)
-    list_paquet=bdd.get_liste_iduser(iduser)
-    param= {'nbcartes':nbcartes,'liste': list_paquet}
-    return render_template("gestion.html",**param)
+    list_paquet = bdd.get_liste_iduser(iduser)
+    param = {'nbcartes': nbcartes, 'liste': list_paquet}
+    return render_template("gestion.html", **param)
 
 @app.route("/delete_user/<idutilisateur>")
 @f.statuts_obligatoires('administrateur')
 def delete_user(idutilisateur):
-    msg={
+    msg = {
         "ok": "L'utilisateur a bien été supprimé de la base de données.",
         "echec": "Echec de suppression de l'utilisateur dans la base de données"
     }
@@ -276,78 +259,52 @@ def paquet():
 
 @app.route("/paquet/choix")
 def choix_paquet():
-
     iduser = session.get("idutilisateur")
-
-    paquets = bdd.get_paquets_user(iduser)   #fonction SQL récupère tous les paquets du user
-
+    paquets = bdd.get_paquets_user(iduser)
     if not paquets:
         paquets = []
-
     return render_template("paquet/choix.html", paquets=paquets)
 
 @app.route("/paquet/creation", methods=["GET", "POST"])
 def creation_paquet():
-
     if request.method == "POST":
-
         nompaquet = request.form.get("nom_paquet")
         idcreateur = session.get("idutilisateur")
-
-        public = 1 if request.form.get("public") else 0 #Vérifie si la case “Paquet public” est cochée, pour sql
-
+        public = 1 if request.form.get("public") else 0
         bdd.create_paquet(nompaquet, idcreateur, public)
         return redirect("/paquet/choix")
-
     return render_template("/paquet/creation.html")
-
 
 @app.route("/paquet/supprimer/<int:idpaquet>")
 def supprimer_paquet(idpaquet):
-
     idcreateur = session.get("idutilisateur")
-
     bdd.delete_paquet(idpaquet, idcreateur)
-
     return redirect("/paquet/choix")
-
 
 @app.route("/paquet/modifier/<int:idpaquet>", methods=["GET", "POST"])
 def modifier_paquet(idpaquet):
-
     iduser = session.get("idutilisateur")
-
     paquet = bdd.get_one_paquet(idpaquet, iduser)
-
-    if request.method == "POST":   #Vérifie si le formulaire a été envoyé
-
+    if request.method == "POST":
         nom = request.form.get("nom_paquet")
-
-        public = request.form.get("public")  #Récupère la checkbox
-        public = 1 if public else 0     #Transforme valeur en booléen pour sql
-
+        public = request.form.get("public")
+        public = 1 if public else 0
         bdd.update_paquet(idpaquet, nom, public)
-
         return redirect("/paquet/choix")
-
     return render_template("paquet/modif.html", paquet=paquet)
-
-
 
 @app.route("/updatecarte")
 @f.statuts_obligatoires()
 def updatecarte():
     return render_template("creationcartes.html")
 
-
 @app.route("/listepaquet")
 @f.statuts_obligatoires()
 def listepaquet():
-    list_paquet=bdd.get_liste_public()
+    list_paquet = bdd.get_liste_public()
     categories = get_flashcard_banks()
     params = {'liste': list_paquet, 'categories': categories}
     return render_template("listepaquet.html", **params)
-
 
 @app.route("/cartes/<int:idpaquet>")
 @f.statuts_obligatoires()
@@ -404,55 +361,47 @@ def supprimer_carte(idcarte):
 def revision():
     return render_template("revision.html")
 
-
 @app.route("/revision/choix")
 @f.statuts_obligatoires()
 def choix_revision():
     iduser = session.get("idutilisateur")
     paquets = bdd.get_paquets_revision(iduser)
-    print("ID USER :", iduser)
-    print("PAQUETS :", paquets)
     categories = {}
     for paquet in paquets:
         categorie = paquet["nomcategorie"]
         if categorie not in categories:
             categories[categorie] = []
         categories[categorie].append(paquet)
-    return render_template("revision/choix.html",categories=categories)
+    return render_template("revision/choix.html", categories=categories)
 
-
-#route de démarrage de la session de révision
 @app.route("/revision/<int:idpaquet>")
 @f.statuts_obligatoires()
 def revision_paquet(idpaquet):
-    cartes = bdd.get_cartes_by_paquet(idpaquet)
+    idutilisateur = session.get("idutilisateur")
+    cartes = bdd.get_cartes_a_reviser(idutilisateur, idpaquet)
     if not cartes:
-        flash("Ce paquet ne contient aucune carte.", "warning")
+        flash("Aucune carte à réviser pour le moment !", "info")
         return redirect(url_for("choix_revision"))
     session["revision_paquet"] = idpaquet
     session["revision_index"] = 0
     session["show_answer"] = False
+    session["revision_carte_ids"] = [c["idcarte"] for c in cartes]
     return redirect(url_for("revision_carte"))
 
 
-#route carte affichée durant la révision
 @app.route("/revision/carte")
 @f.statuts_obligatoires()
 def revision_carte():
-    idpaquet = session.get("revision_paquet")
-    if not idpaquet:
+    carte_ids = session.get("revision_carte_ids")
+    if not carte_ids:
         return redirect(url_for("choix_revision"))
-    cartes = bdd.get_cartes_by_paquet(idpaquet)
     index = session.get("revision_index", 0)
-    if index >= len(cartes):
+    if index >= len(carte_ids):
         return render_template("revision/fin.html")
-
-    carte = cartes[index]
-    return render_template("revision/revision_paquet.html",carte=carte,
+    carte = bdd.get_carte_by_id(carte_ids[index])
+    return render_template("revision/revision_paquet.html", carte=carte,
                            show_answer=session.get("show_answer", False))
-    
-       
-#route pour affichée la réponse écrite sur la carte
+
 @app.route("/revision/reponse", methods=["POST"])
 @f.statuts_obligatoires()
 def afficher_reponse():
@@ -464,18 +413,15 @@ def afficher_reponse():
 def carte_suivante(idcarte, savais):
     idutilisateur = session.get("idutilisateur")
     revision_actuelle = bdd.get_revision(idutilisateur, idcarte)
-    
     if savais == 1:
         boite_actuelle = revision_actuelle['idboite'] if revision_actuelle else 1
         nouvelle_boite = min(boite_actuelle + 1, 5)
     else:
         nouvelle_boite = 1
-    
     if revision_actuelle:
         bdd.update_revision(idutilisateur, idcarte, nouvelle_boite)
     else:
         bdd.add_revision(idutilisateur, idcarte, nouvelle_boite)
-    
     session["revision_index"] += 1
     session["show_answer"] = False
     return redirect(url_for("revision_carte"))
